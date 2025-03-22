@@ -20,76 +20,77 @@
                 </div>
             </div>
         </div>
+
 <!-- Posts Section -->
-<div class="col-lg-7 pt-5    bg-card" style="height: 92vh; overflow-y: scroll;" id="post-container">
-    @if (count($posts) != 0)
+<div class="col-lg-7 pt-5 bg-card" style="height: 92vh; overflow-y: scroll;" id="post-container">
+    @if ($posts->count() > 0)
         @foreach ($posts as $post)
-        <div class="card-box d-flex justify-content-center mb-4">
-            <div class="card shadow rounded border-0" style="width: 35rem">
-                <h5 class="card-title mt-3 fw-bold ms-3">
-                    <span class="me-2 text-primary border-start border-4 border-dark ps-1">
-                        {{$post->topic_name}}
-                        <input class="post_id" type="hidden" value="{{$post->id}}">
-                    </span>
-                </h5>
-                <div class="d-flex align-items-center ms-3 mt-1">
-                    <div style="width: 55px; height: 55px; overflow: hidden;">
-                        @if ($post->profile_image)
-                            <img src="{{asset('storage/'.$post->profile_image)}}" style="object-fit:cover;object-position:center;" class="w-100 h-100 rounded-circle card-img-top" alt="" />
-                        @else
-                            <img class="w-100 h-100 rounded-circle" style="object-fit: cover; object-position:center;" src="https://ui-avatars.com/api/?name={{$post->admin_name}}"/>
-                        @endif
-                    </div>
-                    <div class="ms-2">
-                        <span style="font-size: 18px;" class="fw-semibold">{{$post->admin_name}}
-                            @if ($post->role == 'admin')
-                            <i class="bi bi-patch-check-fill" style="color: #1DA1F2;font-size:14px;"></i>
-                            @endif
-                        </span>
-                        <br>
-                        <span style="font-size: 12px;" class="">{{$post->created_at->diffForHumans()}}</span>
-                    </div>
-                </div>
-                <div class="img-container my-3 mx-4 border rounded border-dark border-3">
-                    @if ($post->image)
-                        <img src="{{asset('storage/'.$post->image)}}" class="image card-img-top" />
-                        <div class="buttons">
-                            <button class="btn btn-primary btn-view"><i class="fa-solid fa-mountain-sun me-2"></i>View</button>
-                            <a href="{{asset('storage/'.$post->image)}}" download class="btn btn-primary btn-download"><i class="fa-solid fa-download"></i></a>
-                        </div>
-                    @else
-                        <img src="{{asset('images/alert gif/postimg.jpg')}}" class="card-img-top img-thumbnail" alt="" />
-                    @endif
-                </div>
-                <div class="card-body">
-                    <p class="card-text" style="white-space: pre-wrap">{{Str::words($post->desc,20,"....")}}</p>
-                    <hr />
-                    <div class="d-flex justify-content-between align-items-center">
-                        @if (Auth::check())
-                            <div class="btn btn-save">
-                                <i class="fa-regular @if ($saveStatus[$post->id] == true) fa-solid @endif text-primary fa-bookmark fs-3"></i>
+            @if ($post->approved == 1) <!-- ✅ Keep this check to filter in the Blade -->
+                <div class="card-box d-flex justify-content-center mb-4">
+                    <div class="card shadow rounded border-0" style="width: 35rem">
+                        <h5 class="card-title mt-3 fw-bold ms-3">
+                            <span class="me-2 text-primary border-start border-4 border-dark ps-1">
+                                {{$post->topic_name}}
+                            </span>
+                        </h5>
+                        <div class="d-flex align-items-center ms-3 mt-1">
+                            <div style="width: 55px; height: 55px; overflow: hidden;">
+                                @if ($post->profile_image)
+                                    <img src="{{asset('storage/'.$post->profile_image)}}" class="w-100 h-100 rounded-circle card-img-top" />
+                                @else
+                                    <img class="w-100 h-100 rounded-circle" src="https://ui-avatars.com/api/?name={{$post->admin_name}}"/>
+                                @endif
                             </div>
-                        @endif
-                        <a href="{{route('user#view',$post->id)}}" class="btn btn-primary @if (!(Auth::check())) ms-auto @endif">
-                            <i class="fa-solid fa-eye me-2"></i>See More
-                        </a>
+                            <div class="ms-2">
+                                <span style="font-size: 18px;" class="fw-semibold">{{$post->admin_name}}
+                                    @if ($post->role == 'admin')
+                                    <i class="bi bi-patch-check-fill" style="color: #1DA1F2;font-size:14px;"></i>
+                                    @endif
+                                </span>
+                                <br>
+                                <span style="font-size: 12px;">{{$post->created_at->diffForHumans()}}</span>
+                            </div>
+                        </div>
+                        <div class="img-container my-3 mx-4 border rounded border-dark border-3">
+                            @if ($post->image)
+                                <img src="{{asset('storage/'.$post->image)}}" class="image card-img-top" />
+                            @else
+                                <img src="{{asset('images/alert gif/postimg.jpg')}}" class="card-img-top img-thumbnail" />
+                            @endif
+                        </div>
+                        <div class="card-body">
+                            <p class="card-text" style="white-space: pre-wrap">{{Str::words($post->desc,20,"....")}}</p>
+                            <hr />
+                            <div class="d-flex justify-content-between align-items-center">
+                                <a href="{{route('user#view',$post->id)}}" class="btn btn-primary">
+                                    <i class="fa-solid fa-eye me-2"></i>See More
+                                </a>
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </div>
-        </div>
+            @endif
         @endforeach
     @else
-    <!-- Centered No Post Message -->
-    <div class="d-flex justify-content-center align-items-center" style="height: 100%; text-align: center;">
-        <h4 class="text-primary">No post to show.</h4>
-    </div>
+        <!-- Centered No Post Message -->
+        <div class="d-flex justify-content-center align-items-center" style="height: 100%; text-align: center;">
+            <h4 class="text-primary">No post to show.</h4>
+        </div>
     @endif
-    <div class="mt-2">
-        {{$posts->appends(request()->query())->links()}}
-    </div>
+<!-- ✅ Custom Pagination Logic to Show Only Approved Posts -->
+<div class="mt-2">
+    {{ $posts->appends(request()->query())->onEachSide(1)->links() }}
 </div>
+
+
+
+
+</div>
+
+
 </div>
 @endsection
+
 
 @if (session('feedbackSent'))
     @section('scriptSource')
@@ -164,20 +165,6 @@
             });
         });
 
-        // Infinite scroll
-        var page = 1;
-        function loadMorePosts() {
-            $.ajax({
-                url: '{{ route('user#home') }}' + '?page=' + page + '&searchKey={{ request('searchKey') }}',
-                type: 'GET',
-                success: function(response) {
-                    if (response) {
-                        $('#post-container').append(response);
-                        page++;
-                    }
-                }
-            });
-        }
 
         var container = $('#post-container');
         container.scroll(function() {

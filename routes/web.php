@@ -74,17 +74,28 @@ Route::middleware(['auth'])->group(function () {
         });
 
         //Post
-        Route::group(['prefix'=>'post'],function() {
-            Route::get('/',[PostController::class,'listPage'])->name('post#listPage');
-            Route::get('asc',[PostController::class,'filterAsc'])->name('post#filterAsc');
-            Route::get('mostSaved',[PostController::class,'mostSaved'])->name('post#mostSaved');
-            Route::get('createPage',[PostController::class,'createPage'])->name('post#createPage');
-            Route::post('create',[PostController::class,'create'])->name('post#create');
-            Route::get('view/{id}',[PostController::class,'view'])->name('post#view');
-            Route::get('delete',[PostController::class,'delete'])->name('post#delete');
-            Route::get('editPage/{id}',[PostController::class,'editPage'])->name('post#editPage');
-            Route::post('edit/{id}',[PostController::class,'edit'])->name('post#edit');
-        });
+  // Post Routes for Admin
+    Route::group(['prefix'=>'post'], function() {
+    Route::get('/', [PostController::class, 'listPage'])->name('post#listPage');
+    Route::get('asc', [PostController::class, 'filterAsc'])->name('post#filterAsc');
+    Route::get('mostSaved', [PostController::class, 'mostSaved'])->name('post#mostSaved');
+    Route::get('createPage', [PostController::class, 'createPage'])->name('post#createPage');
+    Route::post('create', [PostController::class, 'create'])->name('post#create');
+    Route::get('view/{id}', [PostController::class, 'view'])->name('post#view');
+    Route::get('delete', [PostController::class, 'delete'])->name('post#delete');
+    Route::get('editPage/{id}', [PostController::class, 'editPage'])->name('post#editPage');
+    Route::post('edit/{id}', [PostController::class, 'edit'])->name('post#edit');
+
+    // ✅ NEW ROUTES FOR POST APPROVAL SYSTEM
+    Route::get('pending', [PostController::class, 'filterapproved'])->name('post#pending'); // Show all pending posts
+    Route::post('approve/{id}', [PostController::class, 'approve'])->name('post#approve'); // Approve posts
+Route::get('/user/load-more-posts', [PostController::class, 'loadMorePosts'])->name('user.loadMorePosts');
+
+    Route::get('/posts/approved', [PostController::class, 'filterApproved'])->name('post#filterApproved');
+    Route::get('/posts/pending', [PostController::class, 'filterPending'])->name('post#filterPending');
+});
+
+
 
         //Feedback
         Route::group(['prefix'=>'feedback'],function() {
@@ -99,6 +110,7 @@ Route::middleware(['auth'])->group(function () {
 
     //User
     Route::group(['prefix'=>'user','middleware' => ['user_auth', 'verfiy_auth']],function() {
+        Route::get('/user/load-more-posts', [PostController::class, 'loadMorePosts'])->name('user.loadMorePosts');
 
 
         Route::group(['prefix'=>'home'],function(){

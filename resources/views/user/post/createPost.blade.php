@@ -3,27 +3,25 @@
 
 @section('content')
 
-<style>
+<<style>
     #create-post {
-    position: fixed;
-    bottom: 30px;
-    right: 20px;
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 999;
-  }
+        position: fixed;
+        bottom: 30px;
+        right: 20px;
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 999;
+    }
 
-  #create-post i {
-    font-size: 30px;
-    color: #333;
-  }
-
-
+    #create-post i {
+        font-size: 30px;
+        color: #fff;
+    }
 
     @media only screen and (max-width: 600px) {
         #post-form {
@@ -31,57 +29,75 @@
             top: 80px;
             right: -100%;
         }
-
-
     }
-
-
 </style>
+
 <div class="container">
     <div class="row justify-content-center pt-3">
         <div id="create-post" class="bg-primary d-md-none">
             <i class="bi bi-pencil-square text-white"></i>
           </div>
 
-        <div id="post-form" class="col-md-4 d-none d-md-block  border-0 pt-3 ">
-            <form class="card mb-3 shadow rounded p-4 " action="{{route('user#postCreate')}}" method="POST" class="px-4 py-3" enctype="multipart/form-data">
+          <div id="post-form" class="col-md-4 d-none d-md-block border-0 pt-3">
+            <form class="card mb-3 shadow rounded p-4" action="{{ route('user#postCreate') }}" method="POST" enctype="multipart/form-data">
                 @csrf
                 <input type="hidden" name="token" value="{{ $token }}">
+                <input type="hidden" name="adminId" value="{{ Auth::user()->id }}">
+                <input type="hidden" name="approved" value="0"> <!-- Set post as pending -->
+
                 <label for="name" class="form-label fw-semibold">Name</label>
-                <input name="name" type="text" class="form-control" readonly disabled value="{{Auth::user()->name}}">
-                <input type="hidden" name="" value="{{Auth::user()->name}}">
-                <input type="hidden" name="adminId" value="{{Auth::user()->id}}">
+                <input name="name" type="text" class="form-control" readonly disabled value="{{ Auth::user()->name }}">
+
                 <label for="topicId" class="form-label fw-semibold mt-3">Topic</label>
-                <select name="topicId" class="form-select @error('topicId') is-invalid @enderror" style="transition: none;min-width:0;">
+                <select name="topicId" class="form-select @error('topicId') is-invalid @enderror">
                     <option value="">Choose topic</option>
-                    @foreach ($topics as $t )
-                        <option value="{{$t->id}}" @if(old('topicId') == $t->id) selected @endif >{{$t->name}}</option>
+                    @foreach ($topics as $t)
+                        <option value="{{ $t->id }}" @if(old('topicId') == $t->id) selected @endif>{{ $t->name }}</option>
                     @endforeach
                 </select>
                 @error('topicId')
-                <span class="text-danger d-block">{{$message}}</span>
+                    <span class="text-danger d-block">{{ $message }}</span>
                 @enderror
+
                 <label for="postImage" class="form-label fw-semibold mt-3">Image</label>
-                <input type="file" name="postImage" id="" class="form-control @error('postImage') is-invalid @enderror">
+                <input type="file" name="postImage" class="form-control @error('postImage') is-invalid @enderror">
                 @error('postImage')
-                <span class="text-danger">{{$message}}</span>
+                    <span class="text-danger">{{ $message }}</span>
                 @enderror
+
                 <label for="desc" class="form-label fw-semibold mt-3">Content</label>
-                <textarea name="desc" rows="6" class="form-control @error('desc') is-invalid @enderror" placeholder="Enter content messages here...">{{old('desc')}}</textarea>
+                <textarea name="desc" rows="6" class="form-control @error('desc') is-invalid @enderror" placeholder="Enter content here...">{{ old('desc') }}</textarea>
                 @error('desc')
-                <span class="text-danger">{{$message}}</span>
+                    <span class="text-danger">{{ $message }}</span>
                 @enderror
+
                 <div class="d-flex mt-4 mb-1 justify-content-center">
-                    <a href="{{route('post#listPage')}}" class="btn btn-outline-primary" style="width:25%"><i class="fa-solid fa-arrow-left me-2"></i>Back</a>
-                    <button type="submit" class="btn btn-primary ms-2  "  style="width:75%"><i class="fa-solid fa-plus me-2"></i>Create</button>
+                    <a href="{{ route('post#listPage') }}" class="btn btn-outline-primary" style="width:25%">
+                        <i class="fa-solid fa-arrow-left me-2"></i>Back
+                    </a>
+                    <button type="submit" class="btn btn-primary ms-2" style="width:75%">
+                        <i class="fa-solid fa-plus me-2"></i>Submit for Approval
+                    </button>
+                </div>
+
+                <!-- Approval Message -->
+                <div class="text-center mt-3">
+                    <small class="text-muted">Your post will be reviewed before being published.</small>
                 </div>
             </form>
         </div>
+
         <div id="user-posts" class="col-md-6 py-3 overflow-auto flex-column bg-card" style="height:92vh;">
             @if (count($posts) != 0)
            @foreach ($posts as $post )
            <div class="card-box d-flex justify-content-center mb-4">
+
                <div class="card shadow rounded border-0" style="width: 35rem">
+                  <!-- ✅ Post Status Indicator -->
+                  <div class="text-center p-2 {{ $post->approved ? 'bg-success text-white' : 'bg-warning text-dark' }} fw-bold">
+                    <i class="fa-solid {{ $post->approved ? 'fa-check-circle' : 'fa-hourglass-half' }} me-2"></i>
+                    {{ $post->approved ? 'Approved' : 'Pending Approval' }}
+                </div>
                    <h5 class="card-title d-flex justify-content-between align-items-center mt-3 fw-bold ms-3">
                        <span class="me-2 text-primary border-start border-4 border-dark ps-1">
                            {{$post->topic_name}}
@@ -99,6 +115,7 @@
                         </ul>
                       </div>
                    </h5>
+
                    <div class="d-flex align-items-center ms-3 mt-1 ">
                        <div style="width: 55px; height: 55px; overflow: hidden;border-radius: 50%;">
                         @if ($post->profile_image)
@@ -112,6 +129,8 @@
                            <span style="font-size: 12px;" class="">{{$post->created_at->diffForHumans()}}</span>
                        </div>
                    </div>
+
+
                    <div class="img-container pt-3 px-4 ">
                     @if ($post->image)
                     <img src="{{asset('storage/'.$post->image)}}" class="card-img-top img-thumbnail border border-dark" alt="" />

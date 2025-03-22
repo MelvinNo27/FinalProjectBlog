@@ -11,10 +11,19 @@
             <div class="col-md-8 offset-md-2">
                 <div class="card shadow rounded border-0">
 
-                    <!-- Post Topic -->
-                    <h5 class="card-title fw-bold text-primary border-start border-4 border-dark ps-3 mt-3 ms-3">
-                        {{ $topic_name }}
-                    </h5>
+                    <!-- Post Status (Approved / Pending) -->
+                    <div class="d-flex justify-content-between align-items-center p-3 bg-light">
+                        <h5 class="card-title fw-bold text-primary border-start border-4 border-dark ps-3 mb-0">
+                            {{ $topic_name }}
+                        </h5>
+                        <span class="badge @if($post->approved) bg-success @else bg-warning text-dark @endif">
+                            @if ($post->approved)
+                                Approved
+                            @else
+                                Pending Approval
+                            @endif
+                        </span>
+                    </div>
 
                     <!-- Post Author Info -->
                     <div class="d-flex align-items-center ms-3 mt-2">
@@ -42,18 +51,32 @@
 
                     <!-- Post Content -->
                     <div class="card-body">
-                        <p class="card-text" style="white-space: pre-wrap;">{{ Str::words($post->desc, 20, '...') }}</p>
+                        <p class="card-text" style="white-space: pre-wrap;">{{ Str::words($post->desc, 50, '...') }}</p>
                         <hr>
 
-                        <!-- Bookmark & Back Button -->
+                        <!-- Action Buttons -->
                         <div class="d-flex justify-content-between align-items-center">
                             <div class="fs-5 text-primary" style="cursor: pointer;">
                                 <i class="fa-solid fa-bookmark"></i>
                                 <span>{{ $post->save_count }}</span>
                             </div>
-                            <a href="{{ route('post#listPage') }}" class="btn btn-primary">
-                                <i class="fa-solid fa-arrow-left me-2"></i>Back
-                            </a>
+
+                            <div class="d-flex gap-2">
+                                <!-- Approve Button (Visible Only for Pending Posts) -->
+                                @if (!$post->approved)
+                                    <form action="{{ route('post#approve', $post->id) }}" method="POST">
+                                        @csrf
+                                        <button type="submit" class="btn btn-success">
+                                            <i class="fa-solid fa-check me-2"></i>Approve
+                                        </button>
+                                    </form>
+                                @endif
+
+                                <!-- Back Button -->
+                                <a href="{{ route('post#listPage') }}" class="btn btn-primary">
+                                    <i class="fa-solid fa-arrow-left me-2"></i>Back
+                                </a>
+                            </div>
                         </div>
                     </div>
 

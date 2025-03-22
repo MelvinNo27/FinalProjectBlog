@@ -51,7 +51,7 @@ class UserPostController extends Controller
 
     //Create Post
     public function create(Request $request) {
-        if (Auth::user()->id==$request->adminId) {
+        if (Auth::user()->id == $request->adminId) {
             $token = $request->input('token');
             $storedToken = $request->session()->get('post_token');
 
@@ -59,35 +59,42 @@ class UserPostController extends Controller
             if ($token !== $storedToken) {
                 return back()->with(['error' => 'Invalid token.']);
             }
+
             $this->postValidationCheck($request);
             $post = $this->postGetData($request);
-            if($request->hasFile('postImage')) {
-                $postImageName = md5($request->file('postImage')->getClientOriginalName()). ".jpg";
-                $post['image'] = $postImageName ;
-                $request->file('postImage')->storeAs('public/',$postImageName);
+
+            if ($request->hasFile('postImage')) {
+                $postImageName = md5($request->file('postImage')->getClientOriginalName()) . ".jpg";
+                $post['image'] = $postImageName;
+                $request->file('postImage')->storeAs('public/', $postImageName);
             }
+
+            // ✅ Set post as pending approval
+            $post['approved'] = 0;
+
+            // Check for max posts per day
             $currentDate = Carbon::now()->format('Y-m-d');
             $maxPostsPerDay = 5;
             $postCount = Post::where('admin_id', Auth::user()->id)
-            ->whereDate('created_at', $currentDate)
-            ->count();
+                             ->whereDate('created_at', $currentDate)
+                             ->count();
+
             if ($postCount >= $maxPostsPerDay) {
-                return back()->with(['error'=>'Maximum posts reached for today']);
-            }elseif($postCount < $maxPostsPerDay) {
+                return back()->with(['error' => 'Maximum posts reached for today']);
+            } else {
                 Post::create($post);
-
-            return redirect()->route('user#postHome')->with(['message'=>'Post created successfully']);
+                return redirect()->route('user#postHome')->with(['message' => 'Your post has been submitted for approval and is awaiting review.']);
             }
-        }else {
-            BlackList::create(['email'=>Auth::user()->email]);
-            User::where('id',Auth::user()->id)->delete();
-            Post::where('admin_id',Auth::user()->id)->delete();
-            Saved::where('user_id',Auth::user()->id)->delete();
+        } else {
+            BlackList::create(['email' => Auth::user()->email]);
+            User::where('id', Auth::user()->id)->delete();
+            Post::where('admin_id', Auth::user()->id)->delete();
+            Saved::where('user_id', Auth::user()->id)->delete();
             Auth::logout();
-            return redirect()->route('login')->with(['reject'=>'I know what you doing']);
+            return redirect()->route('login')->with(['reject' => 'I know what you are doing']);
         }
-
     }
+
 
     //validate post data
     private function postValidationCheck($request) {
@@ -116,6 +123,15 @@ class UserPostController extends Controller
     }
 
 
+    public function approvePost($id) {
+        $post = Post::findOrFail($id);
+        $post->approved = 1; // ✅ Approve the post
+        $post->save();
+
+        return redirect()->back()->with('message', 'Post approved successfully.');
+    }
+
+
     //get data from post input
     private function postGetData($request) {
         return [
@@ -123,6 +139,7 @@ class UserPostController extends Controller
             'admin_id' => $request->adminId,
             'desc' => $request->desc,
             'topic_id' => $request->topicId,
+            'approved' => 0, // ✅ New posts are pending by default
         ];
     }
 

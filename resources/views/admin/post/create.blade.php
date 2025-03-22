@@ -14,11 +14,13 @@
                 <form action="{{ route('post#create') }}" method="POST" enctype="multipart/form-data">
                     @csrf
 
+                    <input type="hidden" name="adminId" value="{{ Auth::user()->id }}">
+                    <input type="hidden" name="approved" value="{{ Auth::user()->role === 'admin' ? 1 : 0 }}"> <!-- ✅ Auto-approve for admins -->
+
                     <!-- Admin Name (Read-Only) -->
                     <div class="mb-3">
                         <label for="name" class="form-label fw-semibold">Name</label>
                         <input type="text" class="form-control" value="{{ Auth::user()->name }}" readonly disabled>
-                        <input type="hidden" name="adminId" value="{{ Auth::user()->id }}">
                     </div>
 
                     <!-- Topic Selection -->
@@ -64,6 +66,7 @@
                     </div>
 
                 </form>
+
             </div>
         </div>
     </div>
