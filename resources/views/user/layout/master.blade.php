@@ -6,7 +6,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Home Page</title>
-    <link rel="stylesheet" href="{{asset('user/css/custom.css')}}">
+    <link rel="stylesheet" href="{{asset('user/bootstrap/css/bootstrap.mins.css')}}">
     <link rel="stylesheet" href="{{asset(path: 'user/css/user.css')}}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
@@ -180,22 +180,38 @@
                     }
                 });
             });
-            
+
             function enableDarkMode() {
     $('.card').addClass('card-dark border-primary');
     $('.body').addClass('card-dark');
-    $('.bg-card').addClass('body-dark');
+    $('.bg-card').addClass('body-dark'); // ✅ Make post container darker
     $('.btn-white').addClass('btn-dark');
-    $('.sidebar').addClass('bg-dark text-light'); // ✅ Apply dark mode to sidebar
+
+    // ✅ Dark mode for sidebar (darker background for contrast)
+    $('.sidebar').addClass('bg-dark text-light').removeClass('bg-white text-dark');
+
+    // ✅ Dark mode for the entire background (from gray to darker gray)
+    $('body').css('background-color', '#121212'); // Darker than gray for contrast
+    $('.bg-card').css('background-color', '#1c1c1c'); // Make post container darker
+
+    // ✅ Smooth transition effect
+    $('.sidebar, .bg-card, .card, body').css('transition', 'background-color 0.3s ease-in-out, color 0.3s ease-in-out');
 }
 
 function disableDarkMode() {
     $('.card').removeClass('card-dark border-primary');
     $('.body').removeClass('card-dark');
-    $('.bg-card').removeClass('body-dark');
+    $('.bg-card').removeClass('body-dark'); // ✅ Restore original light mode
     $('.btn-white').removeClass('btn-dark');
-    $('.sidebar').removeClass('bg-dark text-light'); // ✅ Remove dark mode from sidebar
+
+    // ✅ Revert sidebar to light mode
+    $('.sidebar').removeClass('bg-dark text-light').addClass('bg-white text-dark');
+
+    // ✅ Restore light gray background
+    $('body').css('background-color', '#f8f9fa'); // Restore light gray
+    $('.bg-card').css('background-color', '#ffffff'); // Restore post container to white
 }
+
 
 
         </script>

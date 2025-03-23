@@ -73,31 +73,34 @@ class UserController extends Controller
 
     // Filter posts by topic
     public function topicFilter($topicId)
-    {
-        $posts = Post::select(
-            'posts.*',
-            'users.role as role',
-            'users.gender as admin_gender',
-            'users.name as admin_name',
-            'users.image as profile_image',
-            'topics.name as topic_name'
-        )
-            ->leftJoin('users', 'posts.admin_id', 'users.id')
-            ->leftJoin('topics', 'posts.topic_id', 'topics.id')
-            ->where('posts.topic_id', $topicId)
-            ->orderBy('posts.created_at', 'desc')
-            ->paginate(10);
+{
+    $posts = Post::select(
+        'posts.*',
+        'users.role as role',
+        'users.gender as admin_gender',
+        'users.name as admin_name',
+        'users.image as profile_image',
+        'topics.name as topic_name'
+    )
+        ->leftJoin('users', 'posts.admin_id', 'users.id')
+        ->leftJoin('topics', 'posts.topic_id', 'topics.id')
+        ->where('posts.topic_id', $topicId)
+        ->orderBy('posts.created_at', 'desc')
+        ->paginate(10);
 
-        $topics = Topic::orderBy('created_at', 'desc')->get();
+    $topics = Topic::orderBy('created_at', 'desc')->get();
 
-        $saveStatus = [];
-        if (Auth::check()) {
-            $savedPosts = Saved::where('user_id', Auth::id())->pluck('post_id')->toArray();
-            foreach ($posts as $post) {
-                $saveStatus[$post->id] = in_array($post->id, $savedPosts);
-            }
+    // Check saved post status
+    $saveStatus = [];
+    if (Auth::check()) {
+        $savedPosts = Saved::where('user_id', Auth::id())->pluck('post_id')->toArray();
+        foreach ($posts as $post) {
+            $saveStatus[$post->id] = in_array($post->id, $savedPosts);
         }
-
-        return view('user.home', compact('posts', 'topics', 'saveStatus'));
     }
+
+    // ✅ Ensure `$topicId` is passed to the view
+    return view('user.home', compact('posts', 'topics', 'saveStatus', 'topicId'));
+}
+
 }

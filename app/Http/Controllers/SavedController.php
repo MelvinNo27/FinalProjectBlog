@@ -45,16 +45,36 @@ class SavedController extends Controller
         return response()->json(200);
     }
 
-    //saved list page
-    public function savedList() {
-        $posts = Saved::select('saveds.*','users.role as role','posts.*','topics.name as topic_name','users.gender as admin_gender','users.name as admin_name','users.image as profile_image')
-        ->leftJoin('posts','saveds.post_id','posts.id')
-        ->leftJoin('users','posts.admin_id','users.id')
-        ->leftJoin('topics','posts.topic_id','topics.id')
-        ->orderBy('posts.created_at','desc')
-        ->where('user_id',Auth::user()->id)->paginate(3);
+ // Saved list page
+ public function savedList(Request $request) {
+    $user_id = Auth::user()->id;
+    $topic_id = $request->query('topic_id'); // Get selected topic ID from URL
 
-        $topics = Topic::get();
-        return view('user.saved',compact('posts','topics'));
+    $postsQuery = Saved::select('saveds.*', 'users.role as role', 'posts.*', 'topics.name as topic_name', 'users.gender as admin_gender', 'users.name as admin_name', 'users.image as profile_image')
+        ->leftJoin('posts', 'saveds.post_id', 'posts.id')
+        ->leftJoin('users', 'posts.admin_id', 'users.id')
+        ->leftJoin('topics', 'posts.topic_id', 'topics.id')
+        ->where('saveds.user_id', $user_id)
+        ->orderBy('posts.created_at', 'desc');
+
+    // Filter posts by topic if a topic is selected
+    if ($topic_id) {
+        $postsQuery->where('posts.topic_id', $topic_id);
     }
+
+    $posts = $postsQuery->paginate(3);
+
+    // Get only topics that have saved posts by this user
+    $topics = Topic::whereIn('id', function ($query) use ($user_id) {
+        $query->select('posts.topic_id')
+              ->from('saveds')
+              ->leftJoin('posts', 'saveds.post_id', 'posts.id')
+              ->where('saveds.user_id', $user_id);
+    })->get();
+
+    return view('user.saved', compact('posts', 'topics'));
+}
+
+
+
 }
