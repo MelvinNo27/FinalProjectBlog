@@ -112,6 +112,7 @@ Route::get('/user/load-more-posts', [PostController::class, 'loadMorePosts'])->n
     Route::group(['prefix'=>'user','middleware' => ['user_auth', 'verfiy_auth']],function() {
         Route::get('/user/load-more-posts', [PostController::class, 'loadMorePosts'])->name('user.loadMorePosts');
 
+        Route::post('/vote-poll', [UserPostController::class, 'votePoll'])->name('user#votePoll');
 
         Route::group(['prefix'=>'home'],function(){
             Route::get('save',[SavedController::class,'save'])->name('user#save');

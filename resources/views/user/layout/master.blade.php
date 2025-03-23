@@ -105,7 +105,7 @@
                             </ul>
                         </div>
                         </ul>
-                        
+
 
                         {{-- Changes  --}}
                         @if(Auth::check())
@@ -180,23 +180,23 @@
                     }
                 });
             });
-
+            
             function enableDarkMode() {
-                // $('.darkmode-icon').html('<i class="bi bi-moon-stars-fill"></i>');
-                $('.card').addClass('card-dark border-primary');
-                $('.body').addClass('card-dark');
-                $('.bg-card').addClass('body-dark');
-                $('.btn-white').addClass('btn-dark');
-            }
+    $('.card').addClass('card-dark border-primary');
+    $('.body').addClass('card-dark');
+    $('.bg-card').addClass('body-dark');
+    $('.btn-white').addClass('btn-dark');
+    $('.sidebar').addClass('bg-dark text-light'); // ✅ Apply dark mode to sidebar
+}
 
-            function disableDarkMode() {
-                $('.card').removeClass('card-dark border-primary');
-                $('.body').removeClass('card-dark');
-                $('.bg-card').removeClass('body-dark');
-                $('.btn-white').removeClass('btn-dark');
-                // $('.darkmode-icon').html('<i class="bi bi-sun-fill"></i>');
+function disableDarkMode() {
+    $('.card').removeClass('card-dark border-primary');
+    $('.body').removeClass('card-dark');
+    $('.bg-card').removeClass('body-dark');
+    $('.btn-white').removeClass('btn-dark');
+    $('.sidebar').removeClass('bg-dark text-light'); // ✅ Remove dark mode from sidebar
+}
 
-            }
 
         </script>
 

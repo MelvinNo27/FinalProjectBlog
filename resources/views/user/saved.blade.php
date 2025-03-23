@@ -93,7 +93,7 @@
             $post_id = $parentNode.find('.post_id').val();
             Swal.fire({
                 title: 'Are you sure bro?',
-                text: "Tagl unsave tot ma loh lh",
+                text: "You want to unsave this Blog?",
                 showCancelButton: true,
                 imageUrl: '{{asset('images/alert gif/mad.gif')}}',
                 imageWidth: 300,
@@ -101,7 +101,7 @@
                 imageAlt: 'Custom image',
                 confirmButtonColor: '#3085d6',
                 cancelButtonColor: '#d33',
-                confirmButtonText: 'Inn unsave ml!'
+                confirmButtonText: 'Confirm'
             }).then((result) => {
                 if (result.isConfirmed) {
                     $.ajax({
@@ -112,7 +112,7 @@
                         success: function() {
                             Swal.fire(
                                 'Unsaved!',
-                                'Unsave lte p honnnt',
+                                'Blog Unsaved',
                                 'success'
                             ).then(function(){
                                 location.reload();

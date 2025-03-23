@@ -20,18 +20,51 @@ class UserPostController extends Controller
 {
     public function home(Request $request) {
         $token = Str::random(32);
-
         $request->session()->put('post_token', $token);
 
-        $topics = Topic::get();
+        $topics = Topic::all(); // ✅ Get all topics
+
+        // ✅ Fetch user's posts with topic and user details
         $posts = Post::select('posts.*', 'users.name as admin_name', 'topics.name as topic_name', 'users.image as profile_image')
             ->where('admin_id', Auth::user()->id)
             ->leftJoin('users', 'posts.admin_id', 'users.id')
             ->leftJoin('topics', 'posts.topic_id', 'topics.id')
+            ->where('posts.approved', 1) // ✅ Only approved posts
             ->orderBy('updated_at', 'desc')
+            ->paginate(10); // ✅ Use pagination for better performance
+
+        // ✅ Fetch recent posts (last 5 approved)
+        $recentPosts = Post::select('id', 'title', 'created_at')
+            ->where('approved', 1)
+            ->latest()
+            ->take(5)
             ->get();
 
-        return view('user.post.createPost', compact('topics', 'posts', 'token'));
+        // ✅ Fetch top 5 contributors based on number of posts
+        $topUsers = User::select('users.id', 'users.name', DB::raw('COUNT(posts.id) as posts_count'))
+            ->leftJoin('posts', 'users.id', '=', 'posts.admin_id')
+            ->where('posts.approved', 1)
+            ->groupBy('users.id', 'users.name')
+            ->orderByDesc('posts_count')
+            ->take(5)
+            ->get();
+
+        return view('user.post.createPost', compact('topics', 'posts', 'token', 'recentPosts', 'topUsers'));
+    }
+
+    public function votePoll(Request $request) {
+        $request->validate([
+            'poll' => 'required|string'
+        ]);
+
+        // Store the vote (Example: Save to a "votes" table)
+        DB::table('poll_votes')->insert([
+            'user_id' => Auth::id(),
+            'vote' => $request->poll,
+            'created_at' => now()
+        ]);
+
+        return back()->with('message', 'Your vote has been submitted successfully!');
     }
 
 
